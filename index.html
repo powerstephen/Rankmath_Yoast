@@ -27,15 +27,32 @@
     .bd{padding:16px}
     .pill{font-size:12px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:4px 8px;border-radius:999px}
 
-    /* Core Inputs — one per row */
+    /* Core Inputs — one per row, plugin-like label style */
     .fields{display:grid;gap:16px}
     .core-fields{grid-template-columns:1fr}
-    .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input[type="number"], select{
+    .field label{
+      display:block;font-size:13px;line-height:1.2;
+      color:var(--muted);margin-bottom:6px;font-weight:600; /* match plugin emphasis */
+    }
+    input[type="number"]{
       width:100%;appearance:none;background:#fff;color:var(--ink);
       border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;outline:none
     }
-    input:focus,select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
+    input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
+
+    /* Currency toggle pills */
+    .currency{
+      display:flex;gap:8px;flex-wrap:wrap
+    }
+    .cur-btn{
+      appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);
+      padding:10px 12px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px
+    }
+    .cur-btn.active{
+      border-color:transparent;
+      background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(124,92,255,.18));
+      box-shadow:0 0 0 2px rgba(124,92,255,.15) inset
+    }
 
     /* Plugins: compact list (no per-item boxes) */
     .addons-wrap{border:1px solid #e6e6e6;border-radius:12px;overflow:hidden}
@@ -56,7 +73,9 @@
       font-size:13px;line-height:1.2;font-weight:600;color:var(--ink);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis
     }
-    .addon-row .cell input{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111}
+    .addon-row .cell input{
+      width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111
+    }
     .hint{color:var(--muted);font-size:11px;margin-top:4px}
 
     .summary{margin-top:20px}
@@ -84,7 +103,7 @@
   <div class="wrap">
     <div class="header">
       <h1>Yoast vs Rank Math – Agency Cost Calculator</h1>
-      <div class="sub">Core inputs stacked for height · Plugins in compact single-line rows (Plugin · Price · % Using).</div>
+      <div class="sub">Pick billing currency first; prices auto-adjust and round **up to the nearest 9** (e.g., GBP → 369).</div>
     </div>
 
     <div class="cols">
@@ -94,22 +113,32 @@
           <div class="hd"><strong>Core Inputs</strong><span class="pill">Required</span></div>
           <div class="bd">
             <div class="fields core-fields">
+
+              <!-- Currency pills first -->
+              <div class="field">
+                <label>Billing currency</label>
+                <div class="currency">
+                  <button class="cur-btn active" data-cur="USD">USD</button>
+                  <button class="cur-btn" data-cur="EUR">EUR</button>
+                  <button class="cur-btn" data-cur="GBP">GBP</button>
+                </div>
+              </div>
+
               <div class="field">
                 <label>Number of client sites</label>
                 <input type="number" id="sites" min="1" value="100">
               </div>
-              <div class="field">
-                <label>Currency</label>
-                <select id="currency"><option>USD</option><option>EUR</option><option>GBP</option></select>
-              </div>
+
               <div class="field">
                 <label>Yoast Premium – per site / year</label>
                 <input type="number" id="yoast" min="0" value="99">
               </div>
+
               <div class="field">
                 <label>Rank Math Agency – annual (flat)</label>
                 <input type="number" id="rm" min="0" value="499">
               </div>
+
             </div>
           </div>
         </section>
@@ -155,7 +184,7 @@
         </div>
         <table>
           <thead><tr><th>Item</th><th>Formula</th><th>Annual</th></tr></thead>
-        <tbody id="rows"></tbody>
+          <tbody id="rows"></tbody>
           <tfoot><tr><td><strong>Total Yoast (incl. add-ons)</strong></td><td></td><td id="yoastTotal2"></td></tr></tfoot>
         </table>
       </div>
@@ -167,10 +196,41 @@
     function numVal(el){ var n = parseFloat(el && el.value); return isFinite(n)?n:0; }
     function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
     function fmt(n){
-      var cSel = byId('currency'); var cur = (cSel && cSel.value) || 'USD';
+      var cur = CURRENT_CURRENCY;
       var v = isFinite(+n)?+n:0;
       try { return v.toLocaleString(undefined,{style:'currency',currency:cur,maximumFractionDigits:0}); }
       catch(e){ return cur+" "+Math.round(v); }
+    }
+
+    // Currency handling
+    var CURRENT_CURRENCY = 'USD';
+    var FX = { USD:1.00, EUR:0.92, GBP:0.74 }; // demo multipliers
+    const BASE_USD = { yoast:99, rm:499 };     // base prices in USD
+
+    // Round UP to the next value ending with 9 (…9)
+    function roundUpToNearest9(value){
+      var n = Math.ceil(value);
+      while (n % 10 !== 9) n++;
+      return n;
+    }
+
+    function setCurrency(cur){
+      CURRENT_CURRENCY = cur;
+      // Toggle UI
+      document.querySelectorAll('.cur-btn').forEach(btn=>{
+        btn.classList.toggle('active', btn.dataset.cur === cur);
+      });
+      // Convert base USD prices each switch (user can still override manually later)
+      var fx = FX[cur] || 1;
+      var newYoast = roundUpToNearest9(BASE_USD.yoast * fx);
+      var newRM    = roundUpToNearest9(BASE_USD.rm * fx);
+
+      var yEl = byId('yoast'), rEl = byId('rm');
+      if(yEl) yEl.value = newYoast;
+      if(rEl) rEl.value = newRM;
+
+      // Update summary currency symbols by recalculating
+      calc();
     }
 
     // Adoption defaults (% of total sites)
@@ -249,14 +309,22 @@
 
     function onChange(e){
       var id=(e&&e.target&&e.target.id)||'';
-      if(['sites','yoast','rm','currency'].indexOf(id)!==-1 ||
+      if(['sites','yoast','rm'].indexOf(id)!==-1 ||
          id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){
         calc();
       }
     }
 
     function init(){
-      renderAddons(); calc();
+      renderAddons();
+      // Currency buttons
+      document.querySelectorAll('.cur-btn').forEach(btn=>{
+        btn.addEventListener('click', function(){
+          setCurrency(this.dataset.cur);
+        });
+      });
+      setCurrency('USD'); // initialize
+      calc();
       document.addEventListener('input',onChange);
       document.addEventListener('change',onChange);
       document.addEventListener('click',function(e){ if (e.target && e.target.id==='addAddonBtn') addCustomAddon(); });
