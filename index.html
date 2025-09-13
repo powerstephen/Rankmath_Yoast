@@ -19,7 +19,6 @@
     /* Two independent columns */
     .cols{display:flex;gap:18px;margin-bottom:20px}
     .col{flex:1;min-width:0}
-    /* Make only the first card in the left column sticky (Core Inputs) */
     .col-left .card.sticky{position:sticky;top:24px}
 
     .card{background:#fafafa;border:1px solid #ddd;border-radius:14px}
@@ -38,10 +37,13 @@
     .addon label{color:var(--ink)}
 
     /* Promo image card */
-    .promo .bd{padding:0}
-    .promo figure{margin:0;display:block}
-    .promo img{display:block;width:100%;height:auto;border-radius:14px}
-    .promo figcaption{padding:10px 14px;color:var(--muted);font-size:13px;border-top:1px solid #eee;background:#fff;border-bottom-left-radius:14px;border-bottom-right-radius:14px}
+    .promo{ margin-top:20px }
+    .promo .bd{ padding:0 }
+    .promo img{
+      display:block;width:100%;height:auto;
+      border-radius:14px;
+      border:1px solid #eee;
+    }
 
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
@@ -72,7 +74,7 @@
     <div class="cols">
       <!-- LEFT COLUMN -->
       <div class="col col-left">
-        <!-- Core Inputs (sticky) -->
+        <!-- Core Inputs -->
         <section class="card sticky">
           <div class="hd"><strong>Core Inputs</strong><span class="pill">Required</span></div>
           <div class="bd">
@@ -87,14 +89,11 @@
           </div>
         </section>
 
-        <!-- Promo image card (fills the remaining space) -->
-        <section class="card promo" aria-label="Rank Math promo">
+        <!-- Promo image card -->
+        <section class="card promo">
           <div class="bd">
-            <figure>
-              <img alt="Rank Math – 3 Million+ Happy Users" 
-                   src="data:image/png;base64,HiNpI9DdWHgvbQcr5LgyZMeKSfET6g7gwvhDUPRIdOCyxBUg2YxpMbsXqtTf4RXAgIRLpZxpHacIiIAIiIAIiIAIiIAIlDGB/wdL++ySlrLV6gAAAABJRU5ErkJggg==" />
-              <figcaption>Trusted by 3M+ WordPress sites. Switch &amp; save with Rank Math Agency.</figcaption>
-            </figure>
+            <img alt="Rank Math – 3 Million+ Happy Users"
+                 src="data:image/png;base64,HiNpI9DdWHgvbQcr5LgyZMeKSfET6g7gwvhDUPRIdOCyxBUg2YxpMbsXqtTf4RXAgIRLpZxpHacIiIAIiIAIiIAIiIAIlDGB/wdL++ySlrLV6gAAAABJRU5ErkJggg==" />
           </div>
         </section>
       </div>
