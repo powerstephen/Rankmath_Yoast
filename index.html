@@ -8,7 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{ --ink:#111; --muted:#555; --accent:#7c5cff; --accent2:#22d3ee; --good:#16a34a; --radius:14px }
+    :root{
+      --ink:#111; --muted:#555; --accent:#6968c4; /* your blue */
+      --good:#16a34a;
+    }
     *{box-sizing:border-box}
     body{margin:0;background:#fff;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px}
     .wrap{max-width:1100px;margin:0 auto}
@@ -16,6 +19,7 @@
     h1{margin:0;font-size:28px;letter-spacing:-.02em}
     .sub{color:var(--muted);margin:6px 0 18px}
 
+    /* Layout */
     .cols{display:flex;gap:18px;margin-bottom:20px}
     .col-left{flex:0 0 38%}
     .col-right{flex:1 1 62%}
@@ -24,27 +28,47 @@
     .card{background:#fafafa;border:1px solid #ddd;border-radius:14px}
     .hd{padding:14px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f5f5f5}
     .bd{padding:16px}
-    .pill{font-size:12px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:4px 8px;border-radius:999px}
+    .pill{
+      font-size:12px;font-weight:700;color:#fff;background:var(--accent);
+      padding:4px 8px;border-radius:999px
+    }
 
+    /* Core Inputs */
     .fields{display:grid;gap:16px}
     .core-fields{grid-template-columns:1fr}
     .field label{display:block;font-size:13px;line-height:1.2;color:var(--muted);margin-bottom:6px;font-weight:600}
-    input[type="number"]{width:100%;background:#fff;color:var(--ink);border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;outline:none}
-    input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
+    input[type="number"]{
+      width:100%;background:#fff;color:var(--ink);border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;outline:none
+    }
+    input:focus{border-color:#aab0ff;box-shadow:0 0 0 3px rgba(105,104,196,.18)}
 
+    /* Currency pills */
     .currency{display:flex;gap:8px;flex-wrap:wrap}
-    .cur-btn{appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);padding:12px 16px;border-radius:999px;cursor:pointer;font-weight:700;font-size:14px}
-    .cur-btn.active{border-color:transparent;background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(124,92,255,.18));box-shadow:0 0 0 2px rgba(124,92,255,.15) inset}
+    .cur-btn{
+      appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);
+      padding:12px 16px;border-radius:999px;cursor:pointer;font-weight:700;font-size:14px
+    }
+    .cur-btn.active{
+      border-color:var(--accent); background:var(--accent); color:#fff;
+      box-shadow:0 0 0 2px rgba(105,104,196,.15) inset
+    }
 
+    /* Plugins list */
     .addons-wrap{border:1px solid #e6e6e6;border-radius:12px;overflow:hidden}
     .addons-head, .addon-row{display:grid;align-items:center;gap:10px;padding:10px 12px}
-    .addons-head{grid-template-columns:28px 1fr 130px 120px;background:#f8f8f8;color:var(--muted);font-size:12px;border-bottom:1px solid #eaeaea}
-    .addon-row{grid-template-columns:28px 1fr 130px 120px;background:#fff;border-top:1px solid #f0f0f0}
+    .addons-head{
+      grid-template-columns:28px 1fr 130px 120px;background:#f0f0ff;color:#3b3a86;
+      font-size:12px;border-bottom:1px solid #dcdcf8
+    }
+    .addon-row{
+      grid-template-columns:28px 1fr 130px 120px;background:#fff;border-top:1px solid #f0f0f0
+    }
     .addon-row:first-of-type{border-top:none}
     .addon-row input[type="checkbox"]{width:16px;height:16px;margin:0 auto;display:block}
     .addon-row .name{font-size:13px;line-height:1.2;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .addon-row .cell input{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111}
 
+    /* Summary */
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
     .total{background:#fff;border:1px dashed #ccc;border-radius:12px;padding:14px}
@@ -56,15 +80,17 @@
     th{color:var(--muted)}
     tfoot td{border-top:1px solid #ddd;font-weight:800}
 
-    /* Highlighted savings box */
-    .save{display:flex;align-items:center;gap:20px;justify-content:space-between;flex-wrap:wrap;background:#e6f9ec;border:2px solid #16a34a;padding:16px;border-radius:14px;font-weight:700;margin-bottom:18px}
+    /* Savings highlight */
+    .save{
+      display:flex;align-items:center;gap:20px;justify-content:space-between;flex-wrap:wrap;
+      background:#e6f9ec;border:2px solid var(--good);padding:18px;border-radius:14px;font-weight:700;margin-bottom:18px
+    }
     .save .val{color:#166534;font-size:20px;font-weight:800}
     .save .monthly{font-size:14px;color:#166534;font-weight:600}
 
     @media(max-width:980px){
       .cols{flex-direction:column}
-      .col-left{flex:1 1 auto}
-      .col-right{flex:1 1 auto}
+      .col-left,.col-right{flex:1 1 auto}
       .col-left .card.sticky{position:static}
       .addons-head,.addon-row{grid-template-columns:28px 1fr 1fr 1fr}
     }
@@ -78,6 +104,7 @@
     </div>
 
     <div class="cols">
+      <!-- LEFT -->
       <div class="col-left">
         <section class="card sticky">
           <div class="hd"><strong>Core Inputs</strong><span class="pill">Required</span></div>
@@ -108,6 +135,7 @@
         </section>
       </div>
 
+      <!-- RIGHT -->
       <div class="col-right">
         <section class="card">
           <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Add-ons</span></div>
@@ -118,17 +146,20 @@
               </div>
               <div id="addons"></div>
             </div>
+
+            <!-- Add custom add-on -->
             <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
               <input id="newAddonLabel" placeholder="Add-on name" style="flex:1; min-width:200px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
               <input id="newAddonPrice" type="number" min="0" placeholder="$/site/yr" style="width:150px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
               <input id="newAddonAdopt" type="number" min="0" max="100" placeholder="% using" style="width:130px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
-              <button id="addAddonBtn" style="background:linear-gradient(90deg,var(--accent),var(--accent2)); border:none; color:#fff; font-weight:700; padding:10px 14px; border-radius:8px; cursor:pointer">Add add-on</button>
+              <button id="addAddonBtn" style="background:var(--accent); border:none; color:#fff; font-weight:700; padding:10px 14px; border-radius:8px; cursor:pointer">Add add-on</button>
             </div>
           </div>
         </section>
       </div>
     </div>
 
+    <!-- SUMMARY -->
     <div class="card summary">
       <div class="hd"><strong>Summary</strong><span class="pill">Auto-updates</span></div>
       <div class="bd">
@@ -162,6 +193,7 @@
       catch(e){ return cur+" "+Math.round(v); }
     }
 
+    /* Fixed price map */
     var CURRENT_CURRENCY = 'USD';
     const PRICE_BY_CURRENCY = {
       USD: { yoast: 99, rm: 469 },
@@ -181,6 +213,7 @@
       calc();
     }
 
+    /* Add-on defaults */
     var ADDON_PRESETS = [
       {key:'local', label:'Yoast Local SEO',       defaultPrice:99, adopt:12, enabled:true},
       {key:'woo',   label:'Yoast WooCommerce SEO', defaultPrice:99, adopt:20, enabled:true},
@@ -258,14 +291,25 @@
 
     function onChange(e){
       var id=(e&&e.target&&e.target.id)||'';
-      if(['sites','yoast','rm'].indexOf(id)!==-1 || id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){ calc(); }
+      if(['sites','yoast','rm'].indexOf(id)!==-1 ||
+         id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){
+        calc();
+      }
     }
 
     function init(){
       renderAddons();
-      document.querySelectorAll('.cur-btn').forEach(btn=>{ btn.addEventListener('click', function(){ setCurrency(this.dataset.cur); }); });
-      setCurrency('USD');
+      document.querySelectorAll('.cur-btn').forEach(btn=>{
+        btn.addEventListener('click', function(){ setCurrency(this.dataset.cur); });
+      });
+      setCurrency('USD'); // initialize
       calc();
       document.addEventListener('input',onChange);
       document.addEventListener('change',onChange);
       document.addEventListener('click',function(e){ if (e.target && e.target.id==='addAddonBtn') addCustomAddon(); });
+    }
+
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',init); } else { init(); }
+  </script>
+</body>
+</html>
