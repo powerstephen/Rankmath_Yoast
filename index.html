@@ -32,7 +32,7 @@
     .core-fields{grid-template-columns:1fr}
     .field label{
       display:block;font-size:13px;line-height:1.2;
-      color:var(--muted);margin-bottom:6px;font-weight:600; /* match plugin emphasis */
+      color:var(--muted);margin-bottom:6px;font-weight:600;
     }
     input[type="number"]{
       width:100%;appearance:none;background:#fff;color:var(--ink);
@@ -41,9 +41,7 @@
     input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
 
     /* Currency toggle pills */
-    .currency{
-      display:flex;gap:8px;flex-wrap:wrap
-    }
+    .currency{display:flex;gap:8px;flex-wrap:wrap}
     .cur-btn{
       appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);
       padding:10px 12px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px
@@ -76,7 +74,6 @@
     .addon-row .cell input{
       width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111
     }
-    .hint{color:var(--muted);font-size:11px;margin-top:4px}
 
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
@@ -103,7 +100,7 @@
   <div class="wrap">
     <div class="header">
       <h1>Yoast vs Rank Math – Agency Cost Calculator</h1>
-      <div class="sub">Pick billing currency first; prices auto-adjust and round **up to the nearest 9** (e.g., GBP → 369).</div>
+      <div class="sub">Pick billing currency first; prices use fixed per-currency values (e.g., USD Rank Math = 469, EUR Yoast = 89).</div>
     </div>
 
     <div class="cols">
@@ -136,7 +133,7 @@
 
               <div class="field">
                 <label>Rank Math Agency – annual (flat)</label>
-                <input type="number" id="rm" min="0" value="499">
+                <input type="number" id="rm" min="0" value="469">
               </div>
 
             </div>
@@ -163,7 +160,6 @@
               <input id="newAddonAdopt" type="number" min="0" max="100" placeholder="% using" style="width:130px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
               <button id="addAddonBtn" style="background:linear-gradient(90deg,var(--accent),var(--accent2)); border:none; color:#fff; font-weight:700; padding:10px 14px; border-radius:8px; cursor:pointer">Add add-on</button>
             </div>
-            <div class="hint">Tip: Use realistic % using per add-on (e.g., WooCommerce ~20%, Local ~10–15%).</div>
           </div>
         </section>
       </div>
@@ -202,17 +198,13 @@
       catch(e){ return cur+" "+Math.round(v); }
     }
 
-    // Currency handling
+    // Fixed price table per currency (no FX calc)
     var CURRENT_CURRENCY = 'USD';
-    var FX = { USD:1.00, EUR:0.92, GBP:0.74 }; // demo multipliers
-    const BASE_USD = { yoast:99, rm:499 };     // base prices in USD
-
-    // Round UP to the next value ending with 9 (…9)
-    function roundUpToNearest9(value){
-      var n = Math.ceil(value);
-      while (n % 10 !== 9) n++;
-      return n;
-    }
+    const PRICE_BY_CURRENCY = {
+      USD: { yoast: 99, rm: 469 },
+      EUR: { yoast: 89, rm: 429 },
+      GBP: { yoast: 89, rm: 369 }
+    };
 
     function setCurrency(cur){
       CURRENT_CURRENCY = cur;
@@ -220,16 +212,12 @@
       document.querySelectorAll('.cur-btn').forEach(btn=>{
         btn.classList.toggle('active', btn.dataset.cur === cur);
       });
-      // Convert base USD prices each switch (user can still override manually later)
-      var fx = FX[cur] || 1;
-      var newYoast = roundUpToNearest9(BASE_USD.yoast * fx);
-      var newRM    = roundUpToNearest9(BASE_USD.rm * fx);
-
+      // Apply fixed prices for Yoast and Rank Math
       var yEl = byId('yoast'), rEl = byId('rm');
-      if(yEl) yEl.value = newYoast;
-      if(rEl) rEl.value = newRM;
-
-      // Update summary currency symbols by recalculating
+      var map = PRICE_BY_CURRENCY[cur] || PRICE_BY_CURRENCY.USD;
+      if(yEl) yEl.value = map.yoast;
+      if(rEl) rEl.value = map.rm;
+      // Recalc to update currency formatting
       calc();
     }
 
@@ -317,13 +305,10 @@
 
     function init(){
       renderAddons();
-      // Currency buttons
       document.querySelectorAll('.cur-btn').forEach(btn=>{
-        btn.addEventListener('click', function(){
-          setCurrency(this.dataset.cur);
-        });
+        btn.addEventListener('click', function(){ setCurrency(this.dataset.cur); });
       });
-      setCurrency('USD'); // initialize
+      setCurrency('USD'); // initialize with USD fixed prices
       calc();
       document.addEventListener('input',onChange);
       document.addEventListener('change',onChange);
