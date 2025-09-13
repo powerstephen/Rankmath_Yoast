@@ -28,60 +28,38 @@
 
     .fields{display:grid;gap:16px}
     .core-fields{grid-template-columns:1fr}
-    .field label{
-      display:block;font-size:13px;line-height:1.2;
-      color:var(--muted);margin-bottom:6px;font-weight:600;
-    }
-    input[type="number"]{
-      width:100%;appearance:none;background:#fff;color:var(--ink);
-      border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;outline:none
-    }
+    .field label{display:block;font-size:13px;line-height:1.2;color:var(--muted);margin-bottom:6px;font-weight:600}
+    input[type="number"]{width:100%;background:#fff;color:var(--ink);border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;outline:none}
     input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
 
     .currency{display:flex;gap:8px;flex-wrap:wrap}
-    .cur-btn{
-      appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);
-      padding:10px 12px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px
-    }
-    .cur-btn.active{
-      border-color:transparent;
-      background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(124,92,255,.18));
-      box-shadow:0 0 0 2px rgba(124,92,255,.15) inset
-    }
+    .cur-btn{appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);padding:12px 16px;border-radius:999px;cursor:pointer;font-weight:700;font-size:14px}
+    .cur-btn.active{border-color:transparent;background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(124,92,255,.18));box-shadow:0 0 0 2px rgba(124,92,255,.15) inset}
 
     .addons-wrap{border:1px solid #e6e6e6;border-radius:12px;overflow:hidden}
-    .addons-head, .addon-row{
-      display:grid;align-items:center;gap:10px;padding:10px 12px
-    }
-    .addons-head{
-      grid-template-columns:28px 1fr 130px 120px;
-      background:#f8f8f8;color:var(--muted);font-size:12px;border-bottom:1px solid #eaeaea
-    }
-    .addon-row{
-      grid-template-columns:28px 1fr 130px 120px;
-      background:#fff;border-top:1px solid #f0f0f0
-    }
+    .addons-head, .addon-row{display:grid;align-items:center;gap:10px;padding:10px 12px}
+    .addons-head{grid-template-columns:28px 1fr 130px 120px;background:#f8f8f8;color:var(--muted);font-size:12px;border-bottom:1px solid #eaeaea}
+    .addon-row{grid-template-columns:28px 1fr 130px 120px;background:#fff;border-top:1px solid #f0f0f0}
     .addon-row:first-of-type{border-top:none}
     .addon-row input[type="checkbox"]{width:16px;height:16px;margin:0 auto;display:block}
-    .addon-row .name{
-      font-size:13px;line-height:1.2;font-weight:600;color:var(--ink);
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-    }
-    .addon-row .cell input{
-      width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111
-    }
+    .addon-row .name{font-size:13px;line-height:1.2;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .addon-row .cell input{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111}
 
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
     .total{background:#fff;border:1px dashed #ccc;border-radius:12px;padding:14px}
     .total h3{margin:0 0 6px;color:var(--muted);font-size:13px}
     .total .v{font-size:22px;font-weight:800}
+
     table{width:100%;border-collapse:collapse;margin-top:10px}
     th,td{padding:10px 12px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
     th{color:var(--muted)}
     tfoot td{border-top:1px solid #ddd;font-weight:800}
-    .save{display:flex;align-items:center;gap:16px;justify-content:space-between;white-space:nowrap;border:1px solid rgba(124,92,255,.3);background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(124,92,255,.12));padding:12px 14px;border-radius:12px;font-weight:700}
-    .save .val{color:var(--good);font-size:20px;font-weight:800}
+
+    /* Highlighted savings box */
+    .save{display:flex;align-items:center;gap:20px;justify-content:space-between;flex-wrap:wrap;background:#e6f9ec;border:2px solid #16a34a;padding:16px;border-radius:14px;font-weight:700;margin-bottom:18px}
+    .save .val{color:#166534;font-size:20px;font-weight:800}
+    .save .monthly{font-size:14px;color:#166534;font-weight:600}
 
     @media(max-width:980px){
       .cols{flex-direction:column}
@@ -132,7 +110,7 @@
 
       <div class="col-right">
         <section class="card">
-          <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Compact list</span></div>
+          <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Add-ons</span></div>
           <div class="bd">
             <div class="addons-wrap">
               <div class="addons-head">
@@ -158,6 +136,7 @@
           <span>Estimated savings with Rank Math:</span>
           <span id="savings" class="val">$0</span>
           <span id="savingsPct" style="opacity:.85">0% cheaper</span>
+          <span id="monthly" class="monthly">(Monthly: $0)</span>
         </div>
         <div class="totals">
           <div class="total"><h3>Annual Yoast stack</h3><div class="v" id="yoastTotal">$0</div></div>
@@ -266,6 +245,7 @@
 
       var yoastTotal = yoastCore + addonsTotal;
       var savings = Math.max(0, yoastTotal - rm);
+      var monthly = savings/12;
 
       if(byId('rows')) byId('rows').innerHTML = rowsHtml;
       if(byId('yoastTotal')) byId('yoastTotal').textContent = fmt(yoastTotal);
@@ -273,28 +253,19 @@
       if(byId('rmTotal')) byId('rmTotal').textContent = fmt(rm);
       if(byId('savings')) byId('savings').textContent = fmt(savings);
       if(byId('savingsPct')) byId('savingsPct').textContent = (yoastTotal>0 ? Math.round(savings/yoastTotal*100) : 0) + '% cheaper';
+      if(byId('monthly')) byId('monthly').textContent = '(Monthly: '+fmt(monthly)+')';
     }
 
     function onChange(e){
       var id=(e&&e.target&&e.target.id)||'';
-      if(['sites','yoast','rm'].indexOf(id)!==-1 ||
-         id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){
-        calc();
-      }
+      if(['sites','yoast','rm'].indexOf(id)!==-1 || id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){ calc(); }
     }
 
     function init(){
       renderAddons();
-      document.querySelectorAll('.cur-btn').forEach(btn=>{
-        btn.addEventListener('click', function(){ setCurrency(this.dataset.cur); });
-      });
-      setCurrency('USD'); 
+      document.querySelectorAll('.cur-btn').forEach(btn=>{ btn.addEventListener('click', function(){ setCurrency(this.dataset.cur); }); });
+      setCurrency('USD');
       calc();
       document.addEventListener('input',onChange);
       document.addEventListener('change',onChange);
       document.addEventListener('click',function(e){ if (e.target && e.target.id==='addAddonBtn') addCustomAddon(); });
-    }
-    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);} else {init();}
-  </script>
-</body>
-</html>
