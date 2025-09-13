@@ -50,18 +50,22 @@
     </div>
 
     <div class="grid">
+      <!-- LEFT: Core Inputs -->
       <section class="card">
         <div class="hd"><strong>Core Inputs</strong><span class="pill">Required</span></div>
         <div class="bd">
           <div class="fields">
             <div class="field"><label>Number of client sites</label><input type="number" id="sites" min="1" value="50"></div>
-            <div class="field"><label>Currency</label><select id="currency"><option>USD</option><option>EUR</option><option>GBP</option></select></div>
+            <div class="field"><label>Currency</label>
+              <select id="currency"><option>USD</option><option>EUR</option><option>GBP</option></select>
+            </div>
             <div class="field"><label>Yoast Premium – per site / year</label><input type="number" id="yoast" min="0" value="99"></div>
             <div class="field"><label>Rank Math Agency – annual (flat)</label><input type="number" id="rm" min="0" value="499"></div>
           </div>
         </div>
       </section>
 
+      <!-- RIGHT: Yoast Plugins -->
       <section class="card">
         <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Select</span></div>
         <div class="bd">
@@ -75,6 +79,7 @@
       </section>
     </div>
 
+    <!-- SUMMARY -->
     <div class="card summary">
       <div class="hd"><strong>Summary</strong><span class="pill">Auto-updates</span></div>
       <div class="bd">
@@ -97,25 +102,32 @@
   </div>
 
   <script>
-    function $(id){ return document.getElementById(id) || null; }
+    // Helpers (no jQuery, no optional chaining)
+    function byId(id){ return document.getElementById(id); }
+    function numVal(el){ var n = parseFloat(el && el.value); return isFinite(n) ? n : 0; }
+
+    // Currency formatter (with safe fallback)
     function fmt(n){
-      var c = ($("#currency") && $("#currency").value) || 'USD';
+      var cSel = byId('currency');
+      var cur = (cSel && cSel.value) || 'USD';
       var v = isFinite(+n) ? +n : 0;
-      try { return v.toLocaleString(undefined,{style:'currency',currency:c,maximumFractionDigits:0}); }
-      catch(e){ return c + " " + Math.round(v); }
+      try { return v.toLocaleString(undefined, { style:'currency', currency:cur, maximumFractionDigits:0 }); }
+      catch(e){ return cur + ' ' + Math.round(v); }
     }
 
+    // Preset Yoast add-ons
     var ADDON_PRESETS = [
-      {key:'local',label:'Yoast Local SEO',defaultPrice:99,enabled:true},
-      {key:'woo',label:'Yoast WooCommerce SEO',defaultPrice:99,enabled:true},
-      {key:'video',label:'Yoast Video SEO',defaultPrice:99,enabled:true},
-      {key:'news',label:'Yoast News SEO',defaultPrice:79,enabled:false}
+      {key:'local', label:'Yoast Local SEO',       defaultPrice:99, enabled:true},
+      {key:'woo',   label:'Yoast WooCommerce SEO', defaultPrice:99, enabled:true},
+      {key:'video', label:'Yoast Video SEO',       defaultPrice:99, enabled:true},
+      {key:'news',  label:'Yoast News SEO',        defaultPrice:79, enabled:false}
     ];
 
+    // Render the add-on rows
     function renderAddons(){
-      var box = $("#addons"); if(!box) return;
+      var box = byId('addons'); if(!box) return;
       box.innerHTML = '';
-      for(var i=0;i<ADDON_PRESETS.length;i++){
+      for (var i=0; i<ADDON_PRESETS.length; i++){
         var a = ADDON_PRESETS[i];
         var row = document.createElement('div');
         row.className = 'addon';
@@ -127,62 +139,74 @@
       }
     }
 
+    // Add a custom add-on
     function addCustomAddon(){
-      var name = ($("#newAddonLabel") && $("#newAddonLabel").value || '').trim();
-      var price = parseFloat($("#newAddonPrice") && $("#newAddonPrice").value || '0') || 0;
+      var nameEl = byId('newAddonLabel');
+      var priceEl = byId('newAddonPrice');
+      var name = (nameEl && nameEl.value || '').trim();
+      var price = parseFloat(priceEl && priceEl.value || '0') || 0;
       if(!name) return;
       var key = 'custom_' + Math.random().toString(36).slice(2,7);
-      ADDON_PRESETS.push({key:key,label:name,defaultPrice:price,enabled:true});
-      if($("#newAddonLabel")) $("#newAddonLabel").value = '';
-      if($("#newAddonPrice")) $("#newAddonPrice").value = '';
-      renderAddons(); calc();
+      ADDON_PRESETS.push({ key:key, label:name, defaultPrice:price, enabled:true });
+      if(nameEl)  nameEl.value = '';
+      if(priceEl) priceEl.value = '';
+      renderAddons();
+      calc();
     }
 
-    function valNum(id){
-      var el = $(id); if(!el) return 0;
-      var n = parseFloat(el.value); return isFinite(n) ? n : 0;
-    }
-
-    function isChecked(id){
-      var el = $(id); return !!(el && el.checked);
-    }
-
+    // Main calculator
     function calc(){
-      var sites   = valNum('sites');
-      var yoastPer= valNum('yoast');
-      var rm      = valNum('rm');
+      var sitesEl = byId('sites');
+      var yoastEl = byId('yoast');
+      var rmEl    = byId('rm');
 
+      var sites    = numVal(sitesEl);
+      var yoastPer = numVal(yoastEl);
+      var rm       = numVal(rmEl);
+
+      // Core Yoast
       var yoastCore = sites * yoastPer;
       var rowsHtml = '<tr><td>Yoast Premium</td><td>'+sites+' × '+fmt(yoastPer)+'</td><td>'+fmt(yoastCore)+'</td></tr>';
 
+      // Add-ons
       var addonsTotal = 0;
-      for(var i=0;i<ADDON_PRESETS.length;i++){
+      for (var i=0; i<ADDON_PRESETS.length; i++){
         var a = ADDON_PRESETS[i];
-        var enabled = isChecked('chk_'+a.key);
-        var priceEl = $('price_'+a.key);
+        var chk = byId('chk_'+a.key);
+        var priceEl = byId('price_'+a.key);
+        var enabled = !!(chk && chk.checked);
         var price = parseFloat(priceEl ? priceEl.value : a.defaultPrice) || 0;
-        if(enabled){
+        if (enabled){
           var cost = sites * price;
           addonsTotal += cost;
           rowsHtml += '<tr><td>'+a.label+'</td><td>'+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
         }
       }
 
+      // Totals
       var yoastTotal = yoastCore + addonsTotal;
-      if($('#rows'))         $('#rows').innerHTML = rowsHtml;
-      if($('#yoastTotal'))   $('#yoastTotal').textContent = fmt(yoastTotal);
-      if($('#yoastTotal2'))  $('#yoastTotal2').textContent = fmt(yoastTotal);
-      if($('#rmTotal'))      $('#rmTotal').textContent = fmt(rm);
+      var rowsBody   = byId('rows');
+      var yTotal     = byId('yoastTotal');
+      var yTotal2    = byId('yoastTotal2');
+      var rmTotal    = byId('rmTotal');
+      var savingsEl  = byId('savings');
+      var pctEl      = byId('savingsPct');
+
+      if(rowsBody) rowsBody.innerHTML = rowsHtml;
+      if(yTotal)   yTotal.textContent = fmt(yoastTotal);
+      if(yTotal2)  yTotal2.textContent = fmt(yoastTotal);
+      if(rmTotal)  rmTotal.textContent = fmt(rm);
 
       var savings = Math.max(0, yoastTotal - rm);
-      if($('#savings'))      $('#savings').textContent = fmt(savings);
-      if($('#savingsPct'))   $('#savingsPct').textContent = (yoastTotal>0 ? Math.round(savings/yoastTotal*100) : 0) + '% cheaper';
+      if(savingsEl) savingsEl.textContent = fmt(savings);
+      if(pctEl)     pctEl.textContent = (yoastTotal > 0 ? Math.round(savings/yoastTotal*100) : 0) + '% cheaper';
     }
 
-    function handle(e){
-      var id = (e.target && e.target.id) || '';
-      var core = ['sites','yoast','rm','currency'];
-      if (core.indexOf(id) !== -1 || id.indexOf('chk_')===0 || id.indexOf('price_')===0) {
+    // Event wiring
+    function onChange(e){
+      var id = (e && e.target && e.target.id) || '';
+      if (id === 'sites' || id === 'yoast' || id === 'rm' || id === 'currency' ||
+          id.indexOf('chk_') === 0 || id.indexOf('price_') === 0){
         calc();
       }
     }
@@ -190,14 +214,14 @@
     function init(){
       renderAddons();
       calc();
-      document.addEventListener('input', handle);
-      document.addEventListener('change', handle);
+      document.addEventListener('input', onChange);
+      document.addEventListener('change', onChange);
       document.addEventListener('click', function(e){
         if (e.target && e.target.id === 'addAddonBtn') addCustomAddon();
       });
     }
 
-    if (document.readyState === 'loading') {
+    if (document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', init);
     } else {
       init();
