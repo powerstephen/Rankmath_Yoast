@@ -97,10 +97,15 @@
   </div>
 
   <script>
-    const $ = id => document.getElementById(id);
-    const fmt = n => (isFinite(+n)?+n:0).toLocaleString(undefined,{style:'currency',currency:($("#currency").value||'USD'),maximumFractionDigits:0});
+    function $(id){ return document.getElementById(id) || null; }
+    function fmt(n){
+      var c = ($("#currency") && $("#currency").value) || 'USD';
+      var v = isFinite(+n) ? +n : 0;
+      try { return v.toLocaleString(undefined,{style:'currency',currency:c,maximumFractionDigits:0}); }
+      catch(e){ return c + " " + Math.round(v); }
+    }
 
-    let ADDON_PRESETS = [
+    var ADDON_PRESETS = [
       {key:'local',label:'Yoast Local SEO',defaultPrice:99,enabled:true},
       {key:'woo',label:'Yoast WooCommerce SEO',defaultPrice:99,enabled:true},
       {key:'video',label:'Yoast Video SEO',defaultPrice:99,enabled:true},
@@ -108,66 +113,95 @@
     ];
 
     function renderAddons(){
-      const box = $("#addons"); box.innerHTML = '';
-      ADDON_PRESETS.forEach(a=>{
-        const row = document.createElement('div');
+      var box = $("#addons"); if(!box) return;
+      box.innerHTML = '';
+      for(var i=0;i<ADDON_PRESETS.length;i++){
+        var a = ADDON_PRESETS[i];
+        var row = document.createElement('div');
         row.className = 'addon';
-        row.innerHTML = `
-          <input type="checkbox" id="chk_${a.key}" ${a.enabled?'checked':''}>
-          <label for="chk_${a.key}">${a.label}</label>
-          <input type="number" id="price_${a.key}" min="0" value="${a.defaultPrice}">
-        `;
+        row.innerHTML =
+          '<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>' +
+          '<label for="chk_'+a.key+'">'+a.label+'</label>' +
+          '<input type="number" id="price_'+a.key+'" min="0" value="'+a.defaultPrice+'">';
         box.appendChild(row);
-      });
+      }
     }
 
     function addCustomAddon(){
-      const name = $("#newAddonLabel").value.trim();
-      const price = +($("#newAddonPrice").value||0);
+      var name = ($("#newAddonLabel") && $("#newAddonLabel").value || '').trim();
+      var price = parseFloat($("#newAddonPrice") && $("#newAddonPrice").value || '0') || 0;
       if(!name) return;
-      const key = 'custom_'+Math.random().toString(36).slice(2,7);
-      ADDON_PRESETS.push({ key, label:name, defaultPrice:price||0, enabled:true });
-      $("#newAddonLabel").value = '';
-      $("#newAddonPrice").value = '';
+      var key = 'custom_' + Math.random().toString(36).slice(2,7);
+      ADDON_PRESETS.push({key:key,label:name,defaultPrice:price,enabled:true});
+      if($("#newAddonLabel")) $("#newAddonLabel").value = '';
+      if($("#newAddonPrice")) $("#newAddonPrice").value = '';
       renderAddons(); calc();
     }
 
-    function calc(){
-      const sites = +$("#sites").value || 0;
-      const yoastPer = +$("#yoast").value || 0;
-      const rm = +$("#rm").value || 0;
-
-      const yoastCore = sites * yoastPer;
-      let rowsHtml = `<tr><td>Yoast Premium</td><td>${sites} × ${fmt(yoastPer)}</td><td>${fmt(yoastCore)}</td></tr>`;
-
-      let addonsTotal = 0;
-      ADDON_PRESETS.forEach(a=>{
-        const enabled = $("#chk_"+a.key)?.checked;
-        const price = +($("#price_"+a.key)?.value || a.defaultPrice || 0);
-        if(enabled){
-          const cost = sites * price;
-          addonsTotal += cost;
-          rowsHtml += `<tr><td>${a.label}</td><td>${sites} × ${fmt(price)}</td><td>${fmt(cost)}</td></tr>`;
-        }
-      });
-
-      const yoastTotal = yoastCore + addonsTotal;
-      $("#rows").innerHTML = rowsHtml;
-      $("#yoastTotal").textContent = fmt(yoastTotal);
-      $("#yoastTotal2").textContent = fmt(yoastTotal);
-      $("#rmTotal").textContent = fmt(rm);
-
-      const savings = Math.max(0, yoastTotal - rm);
-      $("#savings").textContent = fmt(savings);
-      $("#savingsPct").textContent = (yoastTotal>0? Math.round(savings/yoastTotal*100):0) + "% cheaper";
+    function valNum(id){
+      var el = $(id); if(!el) return 0;
+      var n = parseFloat(el.value); return isFinite(n) ? n : 0;
     }
 
-    window.addEventListener('input', e=>{
-      if(['sites','yoast','rm','currency'].includes(e.target.id) || e.target.id.startsWith('chk_') || e.target.id.startsWith('price_')) calc();
-    });
-    document.addEventListener('click', e=>{ if(e.target && e.target.id==='addAddonBtn') addCustomAddon(); });
+    function isChecked(id){
+      var el = $(id); return !!(el && el.checked);
+    }
 
-    renderAddons(); calc();
+    function calc(){
+      var sites   = valNum('sites');
+      var yoastPer= valNum('yoast');
+      var rm      = valNum('rm');
+
+      var yoastCore = sites * yoastPer;
+      var rowsHtml = '<tr><td>Yoast Premium</td><td>'+sites+' × '+fmt(yoastPer)+'</td><td>'+fmt(yoastCore)+'</td></tr>';
+
+      var addonsTotal = 0;
+      for(var i=0;i<ADDON_PRESETS.length;i++){
+        var a = ADDON_PRESETS[i];
+        var enabled = isChecked('chk_'+a.key);
+        var priceEl = $('price_'+a.key);
+        var price = parseFloat(priceEl ? priceEl.value : a.defaultPrice) || 0;
+        if(enabled){
+          var cost = sites * price;
+          addonsTotal += cost;
+          rowsHtml += '<tr><td>'+a.label+'</td><td>'+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
+        }
+      }
+
+      var yoastTotal = yoastCore + addonsTotal;
+      if($('#rows'))         $('#rows').innerHTML = rowsHtml;
+      if($('#yoastTotal'))   $('#yoastTotal').textContent = fmt(yoastTotal);
+      if($('#yoastTotal2'))  $('#yoastTotal2').textContent = fmt(yoastTotal);
+      if($('#rmTotal'))      $('#rmTotal').textContent = fmt(rm);
+
+      var savings = Math.max(0, yoastTotal - rm);
+      if($('#savings'))      $('#savings').textContent = fmt(savings);
+      if($('#savingsPct'))   $('#savingsPct').textContent = (yoastTotal>0 ? Math.round(savings/yoastTotal*100) : 0) + '% cheaper';
+    }
+
+    function handle(e){
+      var id = (e.target && e.target.id) || '';
+      var core = ['sites','yoast','rm','currency'];
+      if (core.indexOf(id) !== -1 || id.indexOf('chk_')===0 || id.indexOf('price_')===0) {
+        calc();
+      }
+    }
+
+    function init(){
+      renderAddons();
+      calc();
+      document.addEventListener('input', handle);
+      document.addEventListener('change', handle);
+      document.addEventListener('click', function(e){
+        if (e.target && e.target.id === 'addAddonBtn') addCustomAddon();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
