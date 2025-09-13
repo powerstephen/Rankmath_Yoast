@@ -26,16 +26,36 @@
     .bd{padding:16px}
     .pill{font-size:12px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:4px 8px;border-radius:999px}
 
-    .fields{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
-    .field{display:flex;flex-direction:column;gap:6px}
+    /* Core Inputs: single column to add vertical size */
+    .fields{display:grid;gap:12px}
+    .core-fields{grid-template-columns:1fr;} /* one per row */
+
     label{font-size:13px;color:var(--muted)}
-    input[type="number"], select{appearance:none;background:#fff;color:var(--ink);border:1px solid #ccc;border-radius:10px;padding:10px;font-size:14px;outline:none}
+    input[type="number"], select{
+      appearance:none;background:#fff;color:var(--ink);
+      border:1px solid #ccc;border-radius:10px;padding:10px;font-size:14px;outline:none
+    }
     input:focus,select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
 
-    .addons{display:grid;gap:10px;margin-top:8px}
-    .addon{display:grid;grid-template-columns:auto 1fr 110px 130px;gap:10px;align-items:center;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px}
-    .addon label{color:var(--ink)}
-    .addon small{color:var(--muted);display:block;margin-top:2px;font-size:11px}
+    /* Add-ons */
+    .addons{display:grid;gap:12px;margin-top:8px}
+    .addon{
+      display:grid;grid-template-columns:auto 1fr;gap:10px;
+      background:#fff;border:1px solid #ddd;border-radius:12px;padding:10px
+    }
+    .addon header{
+      grid-column:1 / -1; display:flex;align-items:center;gap:10px;margin-bottom:4px
+    }
+    .addon header label{color:var(--ink);font-weight:600}
+    .mini{
+      grid-column:1 / -1;
+      display:grid;gap:10px;grid-template-columns:1fr 1fr
+    }
+    .miniCard{
+      background:#fafafa;border:1px solid #e6e6e6;border-radius:10px;padding:10px
+    }
+    .miniHd{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .mini input{width:100%}
 
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
@@ -52,8 +72,7 @@
     @media(max-width:980px){
       .cols{flex-direction:column}
       .col-left .card.sticky{position:static}
-      .fields{grid-template-columns:1fr}
-      .addon{grid-template-columns:auto 1fr 1fr 1fr}
+      .mini{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -61,7 +80,7 @@
   <div class="wrap">
     <div class="header">
       <h1>Yoast vs Rank Math – Agency Cost Calculator</h1>
-      <div class="sub">Model real adoption: set % of client sites using each Yoast add-on to get accurate costs.</div>
+      <div class="sub">Set **per-add-on** pricing and **# of sites using it** to model real adoption and true Yoast stack cost.</div>
     </div>
 
     <div class="cols">
@@ -71,7 +90,7 @@
         <section class="card sticky">
           <div class="hd"><strong>Core Inputs</strong><span class="pill">Required</span></div>
           <div class="bd">
-            <div class="fields">
+            <div class="fields core-fields">
               <div class="field"><label>Number of client sites</label><input type="number" id="sites" min="1" value="100"></div>
               <div class="field"><label>Currency</label>
                 <select id="currency"><option>USD</option><option>EUR</option><option>GBP</option></select>
@@ -86,13 +105,15 @@
       <!-- RIGHT COLUMN -->
       <div class="col">
         <section class="card">
-          <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Adoption-aware</span></div>
+          <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Per add-on controls</span></div>
           <div class="bd">
             <div class="addons" id="addons"></div>
-            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+
+            <!-- Add custom add-on -->
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap">
               <input id="newAddonLabel" placeholder="Add-on name" style="flex:1; min-width:180px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
-              <input id="newAddonPrice" type="number" min="0" placeholder="$/site/yr" style="width:130px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
-              <input id="newAddonAdopt" type="number" min="0" max="100" placeholder="% adoption" style="width:130px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
+              <input id="newAddonPrice" type="number" min="0" placeholder="$/site/yr" style="width:150px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
+              <input id="newAddonCount" type="number" min="0" placeholder="# of sites" style="width:150px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
               <button id="addAddonBtn" style="background:linear-gradient(90deg,var(--accent),var(--accent2)); border:none; color:#fff; font-weight:700; padding:10px 14px; border-radius:8px; cursor:pointer">Add add-on</button>
             </div>
           </div>
@@ -125,6 +146,7 @@
   <script>
     function byId(id){ return document.getElementById(id); }
     function numVal(el){ var n = parseFloat(el && el.value); return isFinite(n)?n:0; }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
     function fmt(n){
       var cSel = byId('currency'); var cur = (cSel && cSel.value) || 'USD';
       var v = isFinite(+n)?+n:0;
@@ -132,41 +154,59 @@
       catch(e){ return cur+" "+Math.round(v); }
     }
 
-    // Add-ons now include 'adopt' = % of client sites using it
+    // Defaults: also include a defaultAdopt (%) so we can initialize counts based on current 'sites'
     var ADDON_PRESETS = [
-      {key:'local', label:'Yoast Local SEO',       defaultPrice:99, adopt:10,  enabled:true},
-      {key:'woo',   label:'Yoast WooCommerce SEO', defaultPrice:99, adopt:20,  enabled:true},
-      {key:'video', label:'Yoast Video SEO',       defaultPrice:99, adopt:15,  enabled:true},
-      {key:'news',  label:'Yoast News SEO',        defaultPrice:79, adopt:5,   enabled:false}
+      {key:'local', label:'Yoast Local SEO',       defaultPrice:99, defaultAdopt:10, enabled:true},
+      {key:'woo',   label:'Yoast WooCommerce SEO', defaultPrice:99, defaultAdopt:20, enabled:true},
+      {key:'video', label:'Yoast Video SEO',       defaultPrice:99, defaultAdopt:15, enabled:true},
+      {key:'news',  label:'Yoast News SEO',        defaultPrice:79, defaultAdopt:5,  enabled:false}
     ];
 
     function renderAddons(){
       var box = byId('addons'); if(!box) return;
-      box.innerHTML='';
+      var totalSites = Math.max(0, Math.round(numVal(byId('sites')))) || 0;
+      box.innerHTML = '';
+
       for (var i=0;i<ADDON_PRESETS.length;i++){
-        var a=ADDON_PRESETS[i];
-        var row=document.createElement('div');
-        row.className='addon';
+        var a = ADDON_PRESETS[i];
+        // Initial count based on default adoption
+        var initCount = Math.round(totalSites * (a.defaultAdopt||0) / 100);
+
+        var row = document.createElement('div');
+        row.className = 'addon';
         row.innerHTML =
-          '<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>' +
-          '<label for="chk_'+a.key+'">'+a.label+'<small>Enable if offered</small></label>' +
-          '<div><input type="number" id="price_'+a.key+'" min="0" value="'+a.defaultPrice+'"><small>$/site/yr</small></div>' +
-          '<div><input type="number" id="adopt_'+a.key+'" min="0" max="100" value="'+a.adopt+'"><small>% adoption</small></div>';
+          '<header>' +
+            '<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>' +
+            '<label for="chk_'+a.key+'">'+a.label+'</label>' +
+          '</header>' +
+          '<div class="mini">' +
+            '<div class="miniCard">' +
+              '<div class="miniHd">Cost per site / year</div>' +
+              '<input type="number" id="price_'+a.key+'" min="0" value="'+a.defaultPrice+'">' +
+            '</div>' +
+            '<div class="miniCard">' +
+              '<div class="miniHd"># of sites using</div>' +
+              '<input type="number" id="count_'+a.key+'" min="0" value="'+initCount+'">' +
+            '</div>' +
+          '</div>';
         box.appendChild(row);
       }
     }
 
     function addCustomAddon(){
-      var nameEl=byId('newAddonLabel'), priceEl=byId('newAddonPrice'), adoptEl=byId('newAddonAdopt');
+      var nameEl=byId('newAddonLabel'), priceEl=byId('newAddonPrice'), countEl=byId('newAddonCount');
       var name=(nameEl&&nameEl.value||'').trim();
       var price=parseFloat(priceEl&&priceEl.value||'0')||0;
-      var adopt=parseFloat(adoptEl&&adoptEl.value||'0')||0;
+      var count=Math.max(0, Math.round(parseFloat(countEl&&countEl.value||'0')||0));
       if(!name) return;
-      if(adopt<0) adopt=0; if(adopt>100) adopt=100;
       var key='custom_'+Math.random().toString(36).slice(2,7);
-      ADDON_PRESETS.push({key:key,label:name,defaultPrice:price,adopt:adopt,enabled:true});
-      if(nameEl)nameEl.value=''; if(priceEl)priceEl.value=''; if(adoptEl)adoptEl.value='';
-      renderAddons(); calc();
+      ADDON_PRESETS.push({key:key,label:name,defaultPrice:price,defaultAdopt:0,enabled:true});
+      // Render with current 'sites' context, then set the count explicitly
+      renderAddons();
+      var countInput = byId('count_'+key);
+      if(countInput){ countInput.value = count; }
+      calc();
+      if(nameEl)nameEl.value=''; if(priceEl)priceEl.value=''; if(countEl)countEl.value='';
     }
 
     function calc(){
@@ -182,18 +222,18 @@
         var a = ADDON_PRESETS[i];
         var chk = byId('chk_'+a.key);
         var priceEl = byId('price_'+a.key);
-        var adoptEl = byId('adopt_'+a.key);
+        var countEl = byId('count_'+a.key);
 
         var enabled = !!(chk && chk.checked);
         var price = parseFloat(priceEl ? priceEl.value : a.defaultPrice) || 0;
-        var adopt = parseFloat(adoptEl ? adoptEl.value : a.adopt) || 0;
-        if (adopt < 0) adopt = 0; if (adopt > 100) adopt = 100;
+        var count = Math.max(0, Math.round(parseFloat(countEl ? countEl.value : 0) || 0));
+        // Clamp count to total sites to avoid over-count
+        count = clamp(count, 0, sites);
 
-        if (enabled && sites > 0 && price > 0 && adopt > 0){
-          var usedSites = Math.round(sites * (adopt / 100));
-          var cost = usedSites * price;
+        if (enabled && price > 0 && count > 0){
+          var cost = count * price;
           addonsTotal += cost;
-          rowsHtml += '<tr><td>'+a.label+'</td><td>'+usedSites+' of '+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
+          rowsHtml += '<tr><td>'+a.label+'</td><td>'+count+' sites × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
         }
       }
 
@@ -212,9 +252,11 @@
 
     function onChange(e){
       var id=(e&&e.target&&e.target.id)||'';
-      if(['sites','yoast','rm','currency'].indexOf(id)!==-1 || id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){
+      if(['sites','yoast','rm','currency'].indexOf(id)!==-1 ||
+         id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('count_')===0){
         calc();
       }
+      // If total sites changed, we keep user-entered counts as-is (they’re explicit).
     }
 
     function init(){
