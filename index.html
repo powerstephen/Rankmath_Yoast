@@ -33,17 +33,9 @@
     input:focus,select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
 
     .addons{display:grid;gap:10px;margin-top:8px}
-    .addon{display:grid;grid-template-columns:auto 1fr 120px;gap:10px;align-items:center;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px}
+    .addon{display:grid;grid-template-columns:auto 1fr 110px 130px;gap:10px;align-items:center;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px}
     .addon label{color:var(--ink)}
-
-    /* Promo image card */
-    .promo{ margin-top:20px }
-    .promo .bd{ padding:0 }
-    .promo img{
-      display:block;width:100%;height:auto;
-      border-radius:14px;
-      border:1px solid #eee;
-    }
+    .addon small{color:var(--muted);display:block;margin-top:2px;font-size:11px}
 
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
@@ -57,10 +49,11 @@
     .save{display:flex;align-items:center;gap:16px;justify-content:space-between;white-space:nowrap;border:1px solid rgba(124,92,255,.3);background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(124,92,255,.12));padding:12px 14px;border-radius:12px;font-weight:700}
     .save .val{color:var(--good);font-size:20px;font-weight:800}
 
-    @media(max-width:900px){
+    @media(max-width:980px){
       .cols{flex-direction:column}
       .col-left .card.sticky{position:static}
       .fields{grid-template-columns:1fr}
+      .addon{grid-template-columns:auto 1fr 1fr 1fr}
     }
   </style>
 </head>
@@ -68,7 +61,7 @@
   <div class="wrap">
     <div class="header">
       <h1>Yoast vs Rank Math – Agency Cost Calculator</h1>
-      <div class="sub">Compare the true annual cost of Yoast (Premium + plugins) against a single Rank Math Agency license. Adjust values as needed.</div>
+      <div class="sub">Model real adoption: set % of client sites using each Yoast add-on to get accurate costs.</div>
     </div>
 
     <div class="cols">
@@ -79,7 +72,7 @@
           <div class="hd"><strong>Core Inputs</strong><span class="pill">Required</span></div>
           <div class="bd">
             <div class="fields">
-              <div class="field"><label>Number of client sites</label><input type="number" id="sites" min="1" value="50"></div>
+              <div class="field"><label>Number of client sites</label><input type="number" id="sites" min="1" value="100"></div>
               <div class="field"><label>Currency</label>
                 <select id="currency"><option>USD</option><option>EUR</option><option>GBP</option></select>
               </div>
@@ -88,26 +81,19 @@
             </div>
           </div>
         </section>
-
-        <!-- Promo image card -->
-        <section class="card promo">
-          <div class="bd">
-            <img alt="Rank Math – 3 Million+ Happy Users"
-                 src="data:image/png;base64,HiNpI9DdWHgvbQcr5LgyZMeKSfET6g7gwvhDUPRIdOCyxBUg2YxpMbsXqtTf4RXAgIRLpZxpHacIiIAIiIAIiIAIiIAIlDGB/wdL++ySlrLV6gAAAABJRU5ErkJggg==" />
-          </div>
-        </section>
       </div>
 
       <!-- RIGHT COLUMN -->
       <div class="col">
         <section class="card">
-          <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Select</span></div>
+          <div class="hd"><strong>Yoast Plug-Ins</strong><span class="pill">Adoption-aware</span></div>
           <div class="bd">
             <div class="addons" id="addons"></div>
-            <div style="display:flex; gap:8px; margin-top:10px">
-              <input id="newAddonLabel" placeholder="Add-on name" style="flex:1; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
-              <input id="newAddonPrice" type="number" min="0" placeholder="$/site/yr" style="width:140px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
-              <button id="addAddonBtn" style="background:linear-gradient(90deg,var(--accent),var(--accent2)); border:none; color:#fff; font-weight:700; padding:8px 14px; border-radius:8px; cursor:pointer">Add</button>
+            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+              <input id="newAddonLabel" placeholder="Add-on name" style="flex:1; min-width:180px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
+              <input id="newAddonPrice" type="number" min="0" placeholder="$/site/yr" style="width:130px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
+              <input id="newAddonAdopt" type="number" min="0" max="100" placeholder="% adoption" style="width:130px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
+              <button id="addAddonBtn" style="background:linear-gradient(90deg,var(--accent),var(--accent2)); border:none; color:#fff; font-weight:700; padding:10px 14px; border-radius:8px; cursor:pointer">Add add-on</button>
             </div>
           </div>
         </section>
@@ -140,18 +126,18 @@
     function byId(id){ return document.getElementById(id); }
     function numVal(el){ var n = parseFloat(el && el.value); return isFinite(n)?n:0; }
     function fmt(n){
-      var cSel = byId('currency');
-      var cur = (cSel && cSel.value) || 'USD';
+      var cSel = byId('currency'); var cur = (cSel && cSel.value) || 'USD';
       var v = isFinite(+n)?+n:0;
       try { return v.toLocaleString(undefined,{style:'currency',currency:cur,maximumFractionDigits:0}); }
       catch(e){ return cur+" "+Math.round(v); }
     }
 
+    // Add-ons now include 'adopt' = % of client sites using it
     var ADDON_PRESETS = [
-      {key:'local', label:'Yoast Local SEO', defaultPrice:99, enabled:true},
-      {key:'woo',   label:'Yoast WooCommerce SEO', defaultPrice:99, enabled:true},
-      {key:'video', label:'Yoast Video SEO', defaultPrice:99, enabled:true},
-      {key:'news',  label:'Yoast News SEO',  defaultPrice:79, enabled:false}
+      {key:'local', label:'Yoast Local SEO',       defaultPrice:99, adopt:10,  enabled:true},
+      {key:'woo',   label:'Yoast WooCommerce SEO', defaultPrice:99, adopt:20,  enabled:true},
+      {key:'video', label:'Yoast Video SEO',       defaultPrice:99, adopt:15,  enabled:true},
+      {key:'news',  label:'Yoast News SEO',        defaultPrice:79, adopt:5,   enabled:false}
     ];
 
     function renderAddons(){
@@ -161,61 +147,72 @@
         var a=ADDON_PRESETS[i];
         var row=document.createElement('div');
         row.className='addon';
-        row.innerHTML=
-          '<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>'+
-          '<label for="chk_'+a.key+'">'+a.label+'</label>'+
-          '<input type="number" id="price_'+a.key+'" min="0" value="'+a.defaultPrice+'">';
+        row.innerHTML =
+          '<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>' +
+          '<label for="chk_'+a.key+'">'+a.label+'<small>Enable if offered</small></label>' +
+          '<div><input type="number" id="price_'+a.key+'" min="0" value="'+a.defaultPrice+'"><small>$/site/yr</small></div>' +
+          '<div><input type="number" id="adopt_'+a.key+'" min="0" max="100" value="'+a.adopt+'"><small>% adoption</small></div>';
         box.appendChild(row);
       }
     }
 
     function addCustomAddon(){
-      var nameEl=byId('newAddonLabel'), priceEl=byId('newAddonPrice');
+      var nameEl=byId('newAddonLabel'), priceEl=byId('newAddonPrice'), adoptEl=byId('newAddonAdopt');
       var name=(nameEl&&nameEl.value||'').trim();
       var price=parseFloat(priceEl&&priceEl.value||'0')||0;
-      if(!name)return;
+      var adopt=parseFloat(adoptEl&&adoptEl.value||'0')||0;
+      if(!name) return;
+      if(adopt<0) adopt=0; if(adopt>100) adopt=100;
       var key='custom_'+Math.random().toString(36).slice(2,7);
-      ADDON_PRESETS.push({key:key,label:name,defaultPrice:price,enabled:true});
-      if(nameEl)nameEl.value=''; if(priceEl)priceEl.value='';
+      ADDON_PRESETS.push({key:key,label:name,defaultPrice:price,adopt:adopt,enabled:true});
+      if(nameEl)nameEl.value=''; if(priceEl)priceEl.value=''; if(adoptEl)adoptEl.value='';
       renderAddons(); calc();
     }
 
     function calc(){
-      var sites=numVal(byId('sites'));
-      var yoastPer=numVal(byId('yoast'));
-      var rm=numVal(byId('rm'));
+      var sites = Math.max(0, Math.round(numVal(byId('sites'))));
+      var yoastPer = numVal(byId('yoast'));
+      var rm = numVal(byId('rm'));
 
-      var yoastCore=sites*yoastPer;
-      var rowsHtml='<tr><td>Yoast Premium</td><td>'+sites+' × '+fmt(yoastPer)+'</td><td>'+fmt(yoastCore)+'</td></tr>';
+      var yoastCore = sites * yoastPer;
+      var rowsHtml = '<tr><td>Yoast Premium</td><td>'+sites+' × '+fmt(yoastPer)+'</td><td>'+fmt(yoastCore)+'</td></tr>';
 
-      var addonsTotal=0;
-      for(var i=0;i<ADDON_PRESETS.length;i++){
-        var a=ADDON_PRESETS[i];
-        var chk=byId('chk_'+a.key);
-        var priceEl=byId('price_'+a.key);
-        var enabled=!!(chk&&chk.checked);
-        var price=parseFloat(priceEl?priceEl.value:a.defaultPrice)||0;
-        if(enabled){
-          var cost=sites*price;
-          addonsTotal+=cost;
-          rowsHtml+='<tr><td>'+a.label+'</td><td>'+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
+      var addonsTotal = 0;
+      for (var i=0;i<ADDON_PRESETS.length;i++){
+        var a = ADDON_PRESETS[i];
+        var chk = byId('chk_'+a.key);
+        var priceEl = byId('price_'+a.key);
+        var adoptEl = byId('adopt_'+a.key);
+
+        var enabled = !!(chk && chk.checked);
+        var price = parseFloat(priceEl ? priceEl.value : a.defaultPrice) || 0;
+        var adopt = parseFloat(adoptEl ? adoptEl.value : a.adopt) || 0;
+        if (adopt < 0) adopt = 0; if (adopt > 100) adopt = 100;
+
+        if (enabled && sites > 0 && price > 0 && adopt > 0){
+          var usedSites = Math.round(sites * (adopt / 100));
+          var cost = usedSites * price;
+          addonsTotal += cost;
+          rowsHtml += '<tr><td>'+a.label+'</td><td>'+usedSites+' of '+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
         }
       }
 
-      var yoastTotal=yoastCore+addonsTotal;
-      if(byId('rows'))byId('rows').innerHTML=rowsHtml;
-      if(byId('yoastTotal'))byId('yoastTotal').textContent=fmt(yoastTotal);
-      if(byId('yoastTotal2'))byId('yoastTotal2').textContent=fmt(yoastTotal);
-      if(byId('rmTotal'))byId('rmTotal').textContent=fmt(rm);
+      var yoastTotal = yoastCore + addonsTotal;
+      var savings = Math.max(0, yoastTotal - rm);
 
-      var savings=Math.max(0,yoastTotal-rm);
-      if(byId('savings'))byId('savings').textContent=fmt(savings);
-      if(byId('savingsPct'))byId('savingsPct').textContent=(yoastTotal>0?Math.round(savings/yoastTotal*100):0)+'% cheaper';
+      var rowsBody = byId('rows');
+      if(rowsBody) rowsBody.innerHTML = rowsHtml;
+      var y1 = byId('yoastTotal'), y2 = byId('yoastTotal2'), r1 = byId('rmTotal'), s1 = byId('savings'), p1 = byId('savingsPct');
+      if(y1) y1.textContent = fmt(yoastTotal);
+      if(y2) y2.textContent = fmt(yoastTotal);
+      if(r1) r1.textContent = fmt(rm);
+      if(s1) s1.textContent = fmt(savings);
+      if(p1) p1.textContent = (yoastTotal>0 ? Math.round(savings/yoastTotal*100) : 0) + '% cheaper';
     }
 
     function onChange(e){
       var id=(e&&e.target&&e.target.id)||'';
-      if(['sites','yoast','rm','currency'].indexOf(id)!==-1||id.indexOf('chk_')===0||id.indexOf('price_')===0){
+      if(['sites','yoast','rm','currency'].indexOf(id)!==-1 || id.indexOf('chk_')===0 || id.indexOf('price_')===0 || id.indexOf('adopt_')===0){
         calc();
       }
     }
@@ -226,7 +223,6 @@
       document.addEventListener('change',onChange);
       document.addEventListener('click',function(e){ if (e.target && e.target.id==='addAddonBtn') addCustomAddon(); });
     }
-
     if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);} else {init();}
   </script>
 </body>
