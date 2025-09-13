@@ -8,28 +8,36 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    /* --- STYLING UNCHANGED --- */
     :root{--ink:#111;--muted:#555;--accent:#6968c4;--good:#16a34a}
     *{box-sizing:border-box}
     body{margin:0;background:#fff;color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px}
     .wrap{max-width:1100px;margin:0 auto}
-    .header{text-align:center;margin-bottom:24px}
+    .header{position:relative;text-align:center;margin-bottom:24px}
+    .logo{position:absolute;left:0;top:0;height:36px;display:flex;align-items:center}
+    .logo img{height:36px;width:auto;display:block}
     h1{margin:0;font-size:28px;letter-spacing:-.02em}
     .sub{color:var(--muted);margin:6px 0 18px}
+
     .cols{display:flex;gap:18px;margin-bottom:20px}
-    .col-left{flex:0 0 38%}.col-right{flex:1 1 62%}
+    .col-left{flex:0 0 38%}
+    .col-right{flex:1 1 62%}
     .col-left .card.sticky{position:sticky;top:24px}
+
     .card{background:#fafafa;border:1px solid #ddd;border-radius:14px}
     .hd{padding:14px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f5f5f5}
     .bd{padding:16px}
     .pill{font-size:12px;font-weight:700;color:#fff;background:var(--accent);padding:4px 8px;border-radius:999px}
-    .fields{display:grid;gap:16px}.core-fields{grid-template-columns:1fr}
+
+    .fields{display:grid;gap:16px}
+    .core-fields{grid-template-columns:1fr}
     .field label{display:block;font-size:13px;line-height:1.2;color:var(--muted);margin-bottom:6px;font-weight:600}
     input[type="number"]{width:100%;background:#fff;color:var(--ink);border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;outline:none}
     input:focus{border-color:#aab0ff;box-shadow:0 0 0 3px rgba(105,104,196,.18)}
+
     .currency{display:flex;gap:8px;flex-wrap:wrap}
     .cur-btn{appearance:none;border:1px solid #ccc;background:#fff;color:var(--ink);padding:12px 16px;border-radius:999px;cursor:pointer;font-weight:700;font-size:14px}
     .cur-btn.active{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 0 0 2px rgba(105,104,196,.15) inset}
+
     .addons-wrap{border:1px solid #e6e6e6;border-radius:12px;overflow:hidden}
     .addons-head,.addon-row{display:grid;align-items:center;gap:10px;padding:10px 12px}
     .addons-head{grid-template-columns:28px 1fr 130px 120px;background:#f0f0ff;color:#3b3a86;font-size:12px;border-bottom:1px solid #dcdcf8}
@@ -38,6 +46,7 @@
     .addon-row input[type="checkbox"]{width:16px;height:16px;margin:0 auto;display:block}
     .addon-row .name{font-size:13px;line-height:1.2;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .addon-row .cell input{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111}
+
     .summary{margin-top:20px}
     .totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
     .total{background:#fff;border:1px dashed #ccc;border-radius:12px;padding:14px}
@@ -45,15 +54,30 @@
     .total .v{font-size:22px;font-weight:800}
     table{width:100%;border-collapse:collapse;margin-top:10px}
     th,td{padding:10px 12px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
-    th{color:var(--muted)}tfoot td{border-top:1px solid #ddd;font-weight:800}
+    th{color:var(--muted)}
+    tfoot td{border-top:1px solid #ddd;font-weight:800}
+
     .save{display:flex;align-items:center;gap:20px;justify-content:space-between;flex-wrap:wrap;background:#e6f9ec;border:2px solid var(--good);padding:18px;border-radius:14px;font-weight:700;margin-bottom:18px}
-    .save .val{color:#166534;font-size:20px;font-weight:800}.save .monthly{font-size:14px;color:#166534;font-weight:600}
-    @media(max-width:980px){.cols{flex-direction:column}.col-left,.col-right{flex:1 1 auto}.col-left .card.sticky{position:static}.addons-head,.addon-row{grid-template-columns:28px 1fr 1fr 1fr}}
+    .save .val{color:#166534;font-size:20px;font-weight:800}
+    .save .monthly{font-size:14px;color:#166534;font-weight:600}
+
+    @media(max-width:980px){
+      .cols{flex-direction:column}
+      .col-left,.col-right{flex:1 1 auto}
+      .col-left .card.sticky{position:static}
+      .addons-head,.addon-row{grid-template-columns:28px 1fr 1fr 1fr}
+      .logo{top:-4px} /* tiny safeguard on small screens */
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header">
+      <!-- TOP-LEFT LOGO -->
+      <a class="logo" href="#">
+        <img src="./logo.png" alt="Rank Math" />
+      </a>
+
       <h1>Yoast vs Rank Math – Agency Cost Calculator</h1>
       <div class="sub">See the cost benefits and why agencies are switching to Rank Math.</div>
     </div>
@@ -101,6 +125,8 @@
               </div>
               <div id="addons"></div>
             </div>
+
+            <!-- Add custom add-on -->
             <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
               <input id="newAddonLabel" placeholder="Add-on name" style="flex:1; min-width:200px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
               <input id="newAddonPrice" type="number" min="0" placeholder="$/site/yr" style="width:150px; background:#fff; color:#111; border:1px solid #ccc; border-radius:10px; padding:10px" />
@@ -160,19 +186,16 @@
       document.querySelectorAll('.cur-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.cur===cur));
       var map=PRICE_BY_CURRENCY[cur]||PRICE_BY_CURRENCY.USD;
       byId('yoast').value=map.yoast;byId('rm').value=map.rm;
-      // update addon defaults
-      ADDON_PRESETS.forEach(a=>{
-        if(a.key==='news'){a.defaultPrice=map.addons.news;}
-        else{a.defaultPrice=map.addons.default;}
-      });
+      ADDON_PRESETS.forEach(a=>{a.defaultPrice=(a.key==='news')?map.addons.news:map.addons.default;});
       renderAddons();calc();
     }
 
     function renderAddons(){
-      var box=byId('addons');if(!box)return;box.innerHTML='';
+      var box=byId('addons'); if(!box) return; box.innerHTML='';
       ADDON_PRESETS.forEach(a=>{
         var row=document.createElement('div');row.className='addon-row';
-        row.innerHTML='<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>'+
+        row.innerHTML=
+          '<input type="checkbox" id="chk_'+a.key+'" '+(a.enabled?'checked':'')+'>'+
           '<div class="name"><label for="chk_'+a.key+'">'+a.label+'</label></div>'+
           '<div class="cell"><input type="number" id="price_'+a.key+'" min="0" value="'+a.defaultPrice+'"></div>'+
           '<div class="cell"><input type="number" id="adopt_'+a.key+'" min="0" max="100" value="'+a.adopt+'"></div>';
@@ -181,34 +204,60 @@
     }
 
     function addCustomAddon(){
-      var name=(byId('newAddonLabel').value||'').trim();var price=parseFloat(byId('newAddonPrice').value||'0')||0;var adopt=clamp(parseFloat(byId('newAddonAdopt').value||'0')||0,0,100);
-      if(!name)return;var key='custom_'+Math.random().toString(36).slice(2,7);
+      var name=(byId('newAddonLabel').value||'').trim();
+      var price=parseFloat(byId('newAddonPrice').value||'0')||0;
+      var adopt=clamp(parseFloat(byId('newAddonAdopt').value||'0')||0,0,100);
+      if(!name) return;
+      var key='custom_'+Math.random().toString(36).slice(2,7);
       ADDON_PRESETS.push({key,label:name,defaultPrice:price,adopt,enabled:true});
-      renderAddons();calc();byId('newAddonLabel').value='';byId('newAddonPrice').value='';byId('newAddonAdopt').value='';
+      renderAddons();calc();
+      byId('newAddonLabel').value='';byId('newAddonPrice').value='';byId('newAddonAdopt').value='';
     }
 
     function calc(){
       var sites=Math.max(0,Math.round(numVal(byId('sites'))));
-      var yoastPer=numVal(byId('yoast'));var rm=numVal(byId('rm'));
+      var yoastPer=numVal(byId('yoast')); var rm=numVal(byId('rm'));
       var yoastCore=sites*yoastPer;
       var rowsHtml='<tr><td>Yoast Premium</td><td>'+sites+' × '+fmt(yoastPer)+'</td><td>'+fmt(yoastCore)+'</td></tr>';
       var addonsTotal=0;
       ADDON_PRESETS.forEach(a=>{
-        var chk=byId('chk_'+a.key),priceEl=byId('price_'+a.key),adoptEl=byId('adopt_'+a.key);
-        var enabled=chk&&chk.checked;var price=parseFloat(priceEl?priceEl.value:a.defaultPrice)||0;var adopt=clamp(parseFloat(adoptEl?adoptEl.value:a.adopt)||0,0,100);
-        if(enabled&&sites>0&&price>0&&adopt>0){var usedSites=Math.round(sites*(adopt/100));var cost=usedSites*price;addonsTotal+=cost;
-          rowsHtml+='<tr><td>'+a.label+'</td><td>'+usedSites+' of '+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>'; }
+        var chk=byId('chk_'+a.key), priceEl=byId('price_'+a.key), adoptEl=byId('adopt_'+a.key);
+        var enabled=chk&&chk.checked;
+        var price=parseFloat(priceEl?priceEl.value:a.defaultPrice)||0;
+        var adopt=clamp(parseFloat(adoptEl?adoptEl.value:a.adopt)||0,0,100);
+        if(enabled&&sites>0&&price>0&&adopt>0){
+          var usedSites=Math.round(sites*(adopt/100));
+          var cost=usedSites*price; addonsTotal+=cost;
+          rowsHtml+='<tr><td>'+a.label+'</td><td>'+usedSites+' of '+sites+' × '+fmt(price)+'</td><td>'+fmt(cost)+'</td></tr>';
+        }
       });
-      var yoastTotal=yoastCore+addonsTotal;var savings=Math.max(0,yoastTotal-rm);var monthly=savings/12;
-      byId('rows').innerHTML=rowsHtml;byId('yoastTotal').textContent=fmt(yoastTotal);byId('yoastTotal2').textContent=fmt(yoastTotal);
-      byId('rmTotal').textContent=fmt(rm);byId('savings').textContent=fmt(savings);
+      var yoastTotal=yoastCore+addonsTotal;
+      var savings=Math.max(0,yoastTotal-rm);
+      var monthly=savings/12;
+
+      byId('rows').innerHTML=rowsHtml;
+      byId('yoastTotal').textContent=fmt(yoastTotal);
+      byId('yoastTotal2').textContent=fmt(yoastTotal);
+      byId('rmTotal').textContent=fmt(rm);
+      byId('savings').textContent=fmt(savings);
       byId('savingsPct').textContent=(yoastTotal>0?Math.round(savings/yoastTotal*100):0)+'% cheaper';
       byId('monthly').textContent='(Monthly: '+fmt(monthly)+')';
     }
 
-    function onChange(e){var id=(e&&e.target&&e.target.id)||'';if(['sites','yoast','rm'].includes(id)||id.startsWith('chk_')||id.startsWith('price_')||id.startsWith('adopt_'))calc();}
-    function init(){renderAddons();document.querySelectorAll('.cur-btn').forEach(btn=>btn.addEventListener('click',()=>setCurrency(btn.dataset.cur)));setCurrency('USD');calc();document.addEventListener('input',onChange);document.addEventListener('change',onChange);document.addEventListener('click',e=>{if(e.target&&e.target.id==='addAddonBtn')addCustomAddon();});}
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+    function onChange(e){
+      var id=(e&&e.target&&e.target.id)||'';
+      if(['sites','yoast','rm'].includes(id)||id.startsWith('chk_')||id.startsWith('price_')||id.startsWith('adopt_')) calc();
+    }
+
+    function init(){
+      renderAddons();
+      document.querySelectorAll('.cur-btn').forEach(btn=>btn.addEventListener('click',()=>setCurrency(btn.dataset.cur)));
+      setCurrency('USD'); calc();
+      document.addEventListener('input',onChange);
+      document.addEventListener('change',onChange);
+      document.addEventListener('click',e=>{if(e.target&&e.target.id==='addAddonBtn') addCustomAddon();});
+    }
+    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);} else {init();}
   </script>
 </body>
 </html>
